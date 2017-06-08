@@ -1,0 +1,62 @@
+resistancePred.txt would include the following information:
+
+----------------------------------------------
+#Antibiotic resistance for ERR161312
+********** List of presence genes: ***********
+Exact gene matches: 
+	chuU_CFT073:1.23|protMatch|NODE_6_length_203826_cov_33.5191_ID_20468|191041|192033|27.2505369529|5.46009656739,
+	chuX_CFT073:1.23|protMatch|NODE_6_length_203826_cov_33.5191_ID_20468|189875|190369|27.2505369529|5.46009656739,
+	cvaC_pAPECO2ColV:1.04|dnaMatch|NODE_44_length_11815_cov_28.3046_ID_20544|7314|7625|27.2505369529|5.46009656739,
+Inexact matches: 65 (sequences with many mismatches likely having indels causing frameshift, or sequence where there are many Ns because it's too  diverged from the reference sequence for the aligner to map to)
+	P3:None|mapBased|1.25|59.8492142857,99.54|G180R|,,piperacillin-tazobactam:S,co-amoxiclav:S,cephalexin:S,amoxicillin_ampicillin:R with non-IRT-TEM
+	TEM-1:None|mapBased|3.22415795587|59.8492142857,99.54|C721M:G421K:C228T:G396K|R241X:G141X,,ceftriaxone:S,amoxicillin_ampicillin:R,co-amoxiclav:S,aztreonam:S,cephalexin:R,cefepime:S,carbapenems:S,cefoxitin:S,ceftazidime:S,piperacillin-tazobactam:S,penicillin:R,cefuroxime:S
+	ampC:0.82|NODE_4_length_345437_cov_22.2442_ID_20464|11621|12187|27.2505369529|5.46009656739,97.62|C769T:T258G:T387C:T642C:G138A:C788T:G789A:G22A:G675A:A807G:A1068T:T687A:G946C:T57C:C571A:C60A:C1098T:G1099A:A1100C:C852T:C603T:T1119C:G1123A:A996G:C625T:G893T:G126C|L257F:T263I:A8T:S298I:D367T:P209S:A375T:A316P:Q191K,,penicillin:see promoter in for effect in combination with promoter mutations
+********* Resistance prediction ********
+chuU_CFT073, none, virulence factor:R
+chuX_CFT073, none, virulence factor:R
+cvaC_pAPECO2ColV, none, virulence factor:R
+----------------------------------------------
+For assembly based matching:
+For exact matching:
+    geneName:copyNumber|matchingStatus|contig|startPos|endPost|meanCov|stdCov,resistanceProfile
+
+    where matchingStatus could be 'protMatch' or 'dnaMatch'
+
+For inexact matching:
+    the closest allele is provided.
+    
+    geneName:copyNumber|contig|startPos|endPos|meanCov|stdCov,percentIdentity|dnaMutation|proteinMutation, resistanceProfile
+
+For mapBased matching:
+Exact match gene:
+    geneName:copyNumber|mapBasedFlag|depthCov|meanDepthCovOfReferenceLoci, resistanceProfile
+
+Inexact gene match:
+	geneName:copyNumber|mapBasedFlag|depthCov|meanDepthCovOfReferenceLoci,percentIdentity|dnaMutation|proteinMutation, resistanceProfile
+
+
+Resistance prediction shows the mechanisms that can lead to the phenotypic prediction:
+geneName, geneInCombination, resistance phenotype
+
+where geneInCombination is another gene that is associated with the first gene in order to cause the resistance phenotype
+or it could be the list of mutation that cause the resistance phenotype (for chromosomal genes or promoter SNPs, e.g. SNPS in the qrdr region of gyrA or in the ampC promoter region of ampC gene)
+
+-----------------------------------------------------------
+
+genotypePred.txt
+
+resistType,ERR161312,chuU_CFT073,100.0,99.8,C261T|C207A,1.23,0,NODE_6_length_203826_cov_33.5191_ID_20468|191041|192033|27.2505369529|5.46009656739|protMatch
+
+typingMethod,sampleName, gene, coverageLen,percentIdentity, dnaMutation, copyNumber, protein is truncated (0 means not, 1 means is truncated), comments
+
+comments could contain either contig|start|end|meanCov|stdCov|matchStatus
+or mapBased|depthCov|meanDepthCov
+
+-----------------------------------------------------------
+sampleStats.txt
+
+Estimated number of samples: 1
+Assembly size: 5498591
+Mean contig coverage: 27.2505369529
+Std contig coverage: 5.46009656739
+Mean depth from BAM: 59.8492142857

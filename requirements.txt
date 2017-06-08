@@ -1,0 +1,7 @@
+samtools
+bwa
+makeblastdb
+blastn
+spades
+gatk
+bedtools

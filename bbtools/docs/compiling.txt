@@ -1,0 +1,9 @@
+BBTools has 3 components:
+1) Java code.  This is the bulk of the code and all that is strictly necessary.  It is already compiled for Java 7 and does not need recompiling.  It can run under Java 7 and higher, but NOT Java 6 or lower.
+2) Bash shellscripts.  These are present to make it easier to invoke the Java code (by automatically detecting and setting memory limits, for example).  If you are not using Bash and Linux, then the shellscripts probably won't work, but you can still invoke the Java code from the command line.  Shellscripts are interpreted and do not require compiling.
+3) C code.  This is currently under development by Jonathan Rood to accelerate certain programs (currently BBMap and Dedupe).  It can be enabled with the "usejni" flag.
+
+To use the accelerated versions of BBMap or Dedupe, the C code must first be compiled for your specific platform.  The instructions are in "/jni/README.txt"
+
+Note:
+There are also some older Java 6-compiled versions, which can run most programs in Java 6, but some programs (e.g. BBNorm) will crash because Java 6 lacks some of the features of Java 7.

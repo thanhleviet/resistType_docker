@@ -1,0 +1,12 @@
+amikacin
+amoxicillin_ampicillin
+aztreonam
+ceftazidime
+ceftriaxone
+ciprofloxacin
+co-amoxiclav
+co-trimoxazole
+carbapenems
+gentamicin
+piperacillin-tazobactam
+trimethoprim

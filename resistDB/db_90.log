@@ -1,0 +1,36 @@
+================================================================
+Program: CD-HIT, V4.6, May 01 2015, 11:35:12
+Command: bin/cd-hit-est -i
+         resistDB/ResistanceGeneSeqs_fw.fasta -o
+         resistDB/temp90.fa -c 0.90 -n 8 -aS 0.8 -g 1 -p 1 -d 0
+
+Started: Tue Apr 19 11:31:55 2016
+================================================================
+                            Output                              
+----------------------------------------------------------------
+total seq: 2133
+longest and shortest : 9621 and 117
+Total letters: 1991885
+Sequences have been sorted
+
+Approximated minimal memory consumption:
+Sequence        : 2M
+Buffer          : 1 X 14M = 14M
+Table           : 1 X 1M = 1M
+Miscellaneous   : 0M
+Total           : 17M
+
+Table limit with the given memory limit:
+Max number of representatives: 803471
+Max number of word counting entries: 97784628
+
+comparing sequences from          0  to       2133
+..
+     2133  finished        715  clusters
+
+Apprixmated maximum memory consumption: 22M
+writing new database
+writing clustering information
+program completed !
+
+Total CPU time 1.32

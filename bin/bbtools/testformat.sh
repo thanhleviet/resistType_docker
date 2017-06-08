@@ -1,0 +1,46 @@
+#!/bin/bash
+#testformat in=<infile>
+
+usage(){
+echo "
+Written by Brian Bushnell
+Last modified January 21, 2015
+
+Description:  Tests file extensions and contents to determine format, quality, compression, interleaving, and read length.
+
+Usage:  testformat.sh <file>
+
+More than one file may be specified.
+Note that ASCII-33 (sanger) and ASCII-64 (illumina) cannot always be differentiated.
+
+Please contact Brian Bushnell at bbushnell@lbl.gov if you encounter any problems.
+"
+}
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/"
+CP="$DIR""current/"
+
+z="-Xmx120m"
+EA="-ea"
+set=0
+
+if [ -z "$1" ] || [[ $1 == -h ]] || [[ $1 == --help ]]; then
+	usage
+	exit
+fi
+
+calcXmx () {
+	source "$DIR""/calcmem.sh"
+	parseXmx "$@"
+}
+calcXmx "$@"
+
+testformat() {
+	#module unload oracle-jdk
+	#module load oracle-jdk/1.7_64bit
+	local CMD="java $EA $z -cp $CP fileIO.FileFormat $@"
+#	echo $CMD >&2
+	$CMD
+}
+
+testformat "$@"
