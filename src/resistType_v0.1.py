@@ -161,6 +161,7 @@ class ResistType(object):
             self.preFilterStep()
         else:
             if not os.path.exists(self.contigFile):
+                hasAssembly=False
                 if os.path.exists(self.fastqFile1) and os.path.exists(self.fastqFile2):
                     hasAssembly = self.runSpades(self.fastqFile2, self.fastqFile2, self.contigFile)
                 if not hasAssembly:
