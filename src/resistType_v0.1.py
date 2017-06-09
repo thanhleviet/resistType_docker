@@ -173,7 +173,8 @@ class ResistType(object):
 
         self.readResistGeneCluster()
         [listForExemptionFromAlignment, backToReference] = self.getPresentGenes()
-        self.refFile  = self.makeTempRefFile(listForExemptionFromAlignment, backToReference) 
+        self.refFile  = self.makeTempRefFile(listForExemptionFromAlignment, backToReference)
+
         if self.runBWA():
             with open(self.outFastaFile, "w") as f:
                 pass
@@ -192,7 +193,6 @@ class ResistType(object):
         os.system(cmdLine)
         self.filteredFastqFile1 =  "{0}.reads1.fq.gz".format(self.prefix)
         self.filteredFastqFile2 =  "{0}.reads2.fq.gz".format(self.prefix)
-        print self.filteredFastqFile1
         
         #cmdLine = '{0} mem {1} {2} {3} -O 9 -B 3  | python {4}/src/filterUnmappedReadpairs.py {5} {6} '.format(self.bwaPath, self.resistGeneFastaFullPadded, self.fastqFile1, self.fastqFile2, _baseDir, self.filteredFastqFile1, self.filteredFastqFile2)
         cmdLine = 'bowtie2 --fast -x {0} -1 {1} -2 {2}  | python {3}/src/filterUnmappedReadpairs.py {4} {5}'.format(self.resistGeneFastaFullPadded, self.fastqFile1, self.fastqFile2, _baseDir, self.filteredFastqFile1, self.filteredFastqFile2)
@@ -206,16 +206,14 @@ class ResistType(object):
         self.runSpades(self.filteredFastqFile1, self.filteredFastqFile2, self.contigFile)
         
     def runSpades(self, fq1, fq2, contigFile):
-        self.spadesPath = 'spades.py'
         cmdLine = '{0} -1 {1} -2 {2} -o tmpDir/{3}   --careful -t 2  --phred-offset 33 '.format(self.spadesPath, fq1, fq2, self.suffix)
-        print cmdLine
         os.system(cmdLine)
         cmdLine = 'cp tmpDir/{0}/contigs.fasta {1}'.format(self.suffix, contigFile)
         os.system(cmdLine)
         cmdLine = 'cp tmpDir/{0}/*log {1}'.format(self.suffix, self.outputDir)
         os.system(cmdLine)
         cmdLine = 'rm -rf tmpDir/{0}/'.format(self.suffix)
-        #os.system(cmdLine)
+        os.system(cmdLine)
 
     def inProtSeqDB(self, prot):
         '''
@@ -613,7 +611,6 @@ class ResistType(object):
         cmdLine = "java -jar {0}  R={1}.reference.fa O={1}.reference.dict".format(self.picardToolsPath, self.prefix)
         os.system(cmdLine)
         cmdLine= "{0} genomecov -ibam {1}.output.bam -dz > {1}.outputBam.cov".format(self.bedtoolsPath, self.prefix)
-        print cmdLine
         os.system(cmdLine)
         
         records = SeqIO.index("{0}.reference.fa".format(self.prefix), "fasta")
@@ -635,15 +632,16 @@ class ResistType(object):
                 covInfo[cols[0]].append(cov)
                 if cov <2:
                     nLowDP[record] +=1
-        if not self.isMetaGenomics:
-            RefDP = []
-            for record in records:
-                if record.startswith("REF"):
-                    avgCov = float(np.sum(np.array(covInfo[record]))) / (lenInfo[record] - 200)
-                    RefDP .append(avgCov)
-                else:
-                    nLowDP[record] += lenInfo[record]  -200 - len(covInfo[record])
 
+        RefDP = []
+        for record in records:
+            if record.startswith("REF"):
+                avgCov = float(np.sum(np.array(covInfo[record]))) / (lenInfo[record] - 200)
+                RefDP .append(avgCov)
+            else:
+                nLowDP[record] += lenInfo[record]  -200 - len(covInfo[record])
+                
+        if not self.isMetaGenomics:
             self.meanDP = np.average(np.array(RefDP)) 
             self.outputStatsFile.write("Mean depth from BAM: {0}\n".format(self.meanDP))
             
@@ -663,7 +661,7 @@ class ResistType(object):
         fo = open("{0}.output1.fasta".format(self.prefix), "w") 
         records = SeqIO.parse("{0}.output.fasta".format(self.prefix), "fasta")  
         for record in records:
-            geneName= record.description.split()[1].split(":")[0]
+            geneName= record.description.split()[1].split(":")[0] 
             lowDP = max(nLowDP[geneName], 0)
             seq = str(record.seq)
             nHet = 0
@@ -672,7 +670,7 @@ class ResistType(object):
                     nHet +=1
             
             meanDP = float(np.sum(np.array(covInfo[geneName])))/(lenInfo[geneName] - 200)
-            fo.write(">{0}\tnLowDP_{1}:nHet_{2}:meanDP_{3}\n{4}\n".format(geneName, lowDP, nHet, meanDP, seq))
+            fo.write(">{0}\tnLowDP_{1}:nHet_{2}:meanDP_{3}\n{4}\n".format(geneName + ".resistType", lowDP, nHet, meanDP, seq))
 
         return
 
@@ -689,6 +687,7 @@ class ResistType(object):
         thisSpecies='none'
         if self.refid in ['Ecol', 'Kpne', 'Koxy', 'Paer']:
             thisSpecies = self.refid
+
         ResistDB.resistancePrediction(self.resistGenesMatch, self.resistGenesMismatch, thisSpecies, self.outPredictionFile, self.sampleid, self.outGenotypeFile)
 
     #####################################################  
@@ -712,14 +711,14 @@ class ResistType(object):
             fn =  "{0}/clusterFas/{1}.fa".format(self.resistdb, gene)
             fn = fn.replace("(", "").replace(")", "").replace("\'", "")
             clusterRecords = SeqIO.index(fn, "fasta")
-            thisDP = float(records1[gene].description.split()[-1].split(":")[-1].split("_")[-1]) #coverage depth
+            thisDP = float(records1[gene + ".resistType"].description.split()[-1].split(":")[-1].split("_")[-1]) #coverage depth
             copyNumber = None
 
             if self.meanDP:
                 copyNumber = round(thisDP/self.meanDP)
             if os.path.exists(fn):
                 outBlastFN = self.prefix + ".tempBlast.txt"
-                cmdLine = '{0} -gapopen 5 -gapextend 2 -evalue 0.001 -outfmt \"6 qseqid sseqid pident qlen slen length mismatch gapopen qstart qend sstart send evalue bitscore qseq sseq\" -word_size 17 -subject {1} -query {2} >{3} '.format(self.blastprog,"{0}.output1.fasta".format(self.prefix), fn , outBlastFN)
+                cmdLine = '{0} -gapopen 5 -gapextend 2 -evalue 0.001 -outfmt \"6 qseqid sseqid pident qlen slen length mismatch gapopen qstart qend sstart send evalue bitscore qseq sseq\" -word_size 17 -subject {1} -query {2} >{3} '.format(self.blastprog,self.outFastaFile, fn , outBlastFN)
                 os.system(cmdLine)
                 with open(outBlastFN, "r") as f:
                     hasHit = 0
@@ -728,7 +727,6 @@ class ResistType(object):
                     ssequence = ""                    
                     bestSeq = []
                     for line in f:
-
                         cols = line.strip().split()
                         pident = float(cols[2])
                         qseqid, sseqid = cols[0], cols[1]
