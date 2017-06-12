@@ -75,17 +75,16 @@ speciesDicts={
 }
 
 class ResistType(object):
-    def __init__(self, args): #refid, sampleid, batchName, isMetagenomics, outDir, fq1, fq2
+    def __init__(self, args): #refid, sampleid, plateName, isMetagenomics, outDir, fq1, fq2, sequenceIdentityThreshold, coverageThreshold, bamFile
         self.args = args
         self.refid = args[0]
         self.sampleid = args[1]
         self.suffix=self.sampleid            
         if args[3] != None:
-            self.batchName= args[3]
-            self.suffix=self.batchName + "/" + self.sampleid 
+            self.plateName= args[3]
+            self.suffix=self.plateName + "/" + self.sampleid 
         else:
-            self.batchName = None
-
+            self.plateName = None
         self.isMetaGenomics = args[4]
 
         self.nSamples, self.sumLen = None, None  #estimate of how mixed the sample is (1 = pure culture, 2 = mixture of two subtypes, >2: metagenomic samples)
@@ -94,14 +93,15 @@ class ResistType(object):
         self.outputDir = args[5]
         if self.outputDir ==None:
             self.outputDir = 'resistType'
-        if not os.path.exists(self.outputDir):
-            os.system("mkdir -p {0}".format(self.outputDir))
         self.prefix = self.outputDir + "/" + self.suffix
-
+        tempDir = "/".join(self.prefix.split("/")[:-1])
+        if not os.path.exists(tempDir):
+            os.system("mkdir -p {0}".format(tempDir))
+        
         self.outputStats = '{0}.sampleStats.txt'.format(self.prefix)
         self.contigFile = args[2]
         if self.contigFile == None:
-            self.contigFile = "spadesOutput/{0}.contigs.fasta".format(self.suffix)
+            self.contigFile = "{0}.contigs.fasta".format(self.prefix)
 
         self.fastqFile1 = args[6]
         self.fastqFile2 = args[7]
@@ -112,7 +112,10 @@ class ResistType(object):
             self.fastqFile2 =  "fastq/{0}.reads2.fq.gz".format(self.suffix)
         self.pident=args[8]
         self.covThres=args[9]
-
+        self.bamFile=args[10]
+        if self.bamFile:
+            self.preprocessBam(self.bamFile, self.fastqFile1, self.fastqFile2)
+        
         self.outPredictionFile = '{0}.resistancePred.txt'.format(self.prefix)
         self.outGenotypeFile='{0}.genotypePred.txt'.format(self.prefix)
         self.refFile = self.prefix + '.reference.fa'
@@ -183,24 +186,40 @@ class ResistType(object):
             
         self.makePredictions()
         self.outputStatsFile.close()
-        logger.info("Finished resistType")
-
+        logger.info("Finished resistType.")
+        return
+    
+    def preprocessBam(self, bamFile, fastqFile1, fastqFile2):
+        '''
+        sort bam file, then use bedtools to convert to fastq files
+        '''
+        logger.info("Prepocess bam file, converting to fastq files for assembly")
+        cmdLine = "samtools sort -n {0} tmpDir/{1}.temp".format(bamFile, self.sampleid)
+        logger.info( cmdLine)
+        os.system(cmdLine)
+        
+        cmdLine = "bedtools bamtofastq -i tmpDir/{0}.temp.bam -fq {1} -fq2 {2}; gzip -f {1}; gzip -f {2}; rm tmpDir/{0}/temp.bam".format(self.sampleid, fastqFile1.strip(".gz"), fastqFile2.strip(".gz"))
+        logger.info(cmdLine)
+        os.system(cmdLine)
+        self.fastqFile1 = fastqFile1.strip(".gz") + ".gz"
+        self.fastqFile1 = fastqFile2.strip(".gz") + ".gz"
+        return
+    
     def preFilterStep(self):
         '''
         filter reads by mapping to the big resistance gene file, then assemble using spades
         '''
         cmdLine = 'mkdir -p  tmpDir/{0}'.format(self.suffix)
         os.system(cmdLine)
-        self.filteredFastqFile1 =  "{0}.reads1.fq.gz".format(self.prefix)
-        self.filteredFastqFile2 =  "{0}.reads2.fq.gz".format(self.prefix)
+        self.filteredFastqFile1 =  "{0}.resistType.reads1.fq.gz".format(self.prefix)
+        self.filteredFastqFile2 =  "{0}.resistType.reads2.fq.gz".format(self.prefix)
         
-        #cmdLine = '{0} mem {1} {2} {3} -O 9 -B 3  | python {4}/src/filterUnmappedReadpairs.py {5} {6} '.format(self.bwaPath, self.resistGeneFastaFullPadded, self.fastqFile1, self.fastqFile2, _baseDir, self.filteredFastqFile1, self.filteredFastqFile2)
         cmdLine = 'bowtie2 --fast -x {0} -1 {1} -2 {2}  | python {3}/src/filterUnmappedReadpairs.py {4} {5}'.format(self.resistGeneFastaFullPadded, self.fastqFile1, self.fastqFile2, _baseDir, self.filteredFastqFile1, self.filteredFastqFile2)
-
-        self.fastqFile1 = self.filteredFastqFile1
-        self.fastqFile2 = self.filteredFastqFile2
         logger.info(cmdLine)
         os.system(cmdLine)
+        self.fastqFile1 = self.filteredFastqFile1
+        self.fastqFile2 = self.filteredFastqFile2
+
         self.spadesPath = 'spades.py'
         self.contigFile = '{0}.contigs.fasta'.format(self.prefix)
         self.runSpades(self.filteredFastqFile1, self.filteredFastqFile2, self.contigFile)
@@ -876,7 +895,7 @@ if __name__ == "__main__":
     parser.add_option("-r", "--refid", dest="refid", type="string", default=None, help="Species information of sample in question. (Ecol, Kpne, Koxy, Paer)")
     parser.add_option("-s", "--sampleName", dest="sampleName", type="string", default=None, help="Sample name")
     parser.add_option("-c", "--assemblyFile", dest = "assemblyFile", type="string", default = None, help="path to assembly file")
-    parser.add_option("-b", "--batchName", dest="batchName", type="string", default=None, help="Batch name")
+    parser.add_option("-P", "--plateName", dest="plateName", type="string", default=None, help="Plate name")
 
     parser.add_option("-m", "--metaGenomics", dest = "metaGenomics", type="int", default = 0, help="Sample is metagenomics data. Will filter reads before assembly.")
     parser.add_option("-o", "--outDir", dest = "outDir", type="string", default = None, help="directory of output file")
@@ -884,6 +903,7 @@ if __name__ == "__main__":
     parser.add_option("-2", "--fq2", dest = "fq2", type="string", default = None, help="reverse file of raw fastq files")
     parser.add_option("-p", "--percentIdentity", dest="percentIdentity", type="float", default=90, help="percent identity threshold [70-100]")
     parser.add_option("-C", "--coverage", dest="coverage", type="float", default=0.9, help="blast overlap coverage threshold [0.7-1]")
+    parser.add_option("-b", "--bamFile", dest="bamFile", type="string", default=None, help="input bam file")
     (opts, args) = parser.parse_args()
-    resistTypeModule= ResistType([opts.refid, opts.sampleName, opts.assemblyFile, opts.batchName, opts.metaGenomics, opts.outDir, opts.fq1, opts.fq2, opts.percentIdentity, opts.coverage])
+    resistTypeModule= ResistType([opts.refid, opts.sampleName, opts.assemblyFile, opts.plateName, opts.metaGenomics, opts.outDir, opts.fq1, opts.fq2, opts.percentIdentity, opts.coverage, opts.bamFile])
     resistTypeModule.runResistType()
