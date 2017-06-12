@@ -51,7 +51,7 @@ class mlstType(object):
 
         if self.outDir == None:
             self.outDir = "mlst/"
-        self.prefix = self.outDir + self.sampleid
+        self.prefix = self.outDir + "/" + self.sampleid
         cmdLine = "mkdir -p " + self.outDir
         os.system(cmdLine)
 

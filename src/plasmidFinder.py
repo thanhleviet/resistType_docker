@@ -48,7 +48,7 @@ class PlasmidFinder(object):
             self.outDir = "plasmidfinderOutput/"
         cmdLine = "mkdir -p " + self.outDir
         os.system(cmdLine)
-        self.prefix = self.outDir + self.sampleid
+        self.prefix = self.outDir +"/" + self.sampleid
         self.miniContigFile = "{0}.plasmidfinder.contigs.fa".format(self.prefix)
         if not  self.contigFile:
             self.contigFile = self.miniContigFile

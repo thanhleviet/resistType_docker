@@ -50,7 +50,7 @@ class IsFinder(object):
         cmdLine = "mkdir -p " + self.outDir
         os.system(cmdLine)
 
-        self.prefix = self.outDir + self.sampleid
+        self.prefix = self.outDir + "/" + self.sampleid
         self.miniContigFile = "{0}.isfinder.contigs.fa".format(self.prefix)
         if not self.contigFile:
             self.contigFile = self.miniContigFile
