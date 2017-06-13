@@ -77,7 +77,7 @@ class PlasmidFinder(object):
         filterScript= _baseDir + "/src/filterUnmappedReadpairs.py"
         self.miniFq1 = "{0}.plasmidfinder_reads1.fq.gz".format(self.prefix)
         self.miniFq2 = "{0}.plasmidfinder_reads2.fq.gz".format(self.prefix)
-        cmdLine = "bowtie2 --fast -x {0}  -1 {1} -2 {2}|python {3} {4} {5} ".format(self.alleleDB, self.fq1, self.fq2 , filterScript, self.miniFq1, self.miniFq2)
+        cmdLine = "bowtie2 --fast -x {0}  -1 {1} -2 {2}|python {3} {4} {5} ".format(self.alleleDB.split(".fsa")[0] + "_padded.fa", self.fq1, self.fq2 , filterScript, self.miniFq1, self.miniFq2)
         print cmdLine
         os.system(cmdLine)
         cmdLine = "{3} -1 {0} -2 {1} -o tmpDir/{2} --careful".format(self.miniFq1, self.miniFq2, self.sampleid, self.spadesPath)
