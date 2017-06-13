@@ -40,7 +40,9 @@ To run MLST typing,
 or 
 > docker  run --rm -it  -v /Path/To/LocalDirectory/:/data c9d18d875199 mlstTyping.py -s sampleID -c contig.fasta -o outDir 
 
-Similarly, use plasmidFinder.py for plasmidFinder typing, and isfinder.py for insertion sequence identification. The input of MLST, plasmidFinder and isFinder is similar. The default output directory of these are mlst/, plasmidfinderOutput/, isfinderOutput/ respectively, and all output files have a prefix that is the sampleID. 
+Similarly, use plasmidFinder.py for plasmidFinder typing, and isfinder.py for insertion sequence identification. The input of MLST, plasmidFinder and isFinder is similar. The default output directory of these are mlst/, plasmidfinderOutput/, isfinderOutput/ respectively, and all output files have a prefix that is the sampleID.
+
+Running plasmidFinder from raw read might not be as sensitive as from WGS assemblies as the some of the inc genes (~35%) are relatively short (<300bp)  which could reduce the number of reads mapped to these genes in the filtering step. For MLST typing and isfinder, this is not the case as the MLST loci are roughly ~500bp and the insertion sequences in ISDB only have <1% (38/4580) sequences with length <300bp.  
 
 
 
