@@ -81,6 +81,13 @@ RUN mkdir -p $DST/ && \
     tar -zxvf $DST/$ZIP  -C /home/$FOLDER/resources/
     ENV PATH $DST/SPAdes-3.10.0-Linux/bin:$PATH
 
-WORKDIR /data/
+RUN groupadd resisttype-users && \
+    useradd --create-home --shell /bin/bash --user-group --uid 1000 --groups sudo,resisttype-users rusers && \
+    echo `echo "rusers\nrusers\n" | passwd rusers` && \
+    chown rusers:rusers /data
 
-# CMD ["resistType_v0.1.py -h "]
+USER rusers
+
+WORKDIR /data/
+VOLUME /data/
+CMD ["resistType_v0.1.py -h "]
