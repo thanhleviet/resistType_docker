@@ -134,6 +134,7 @@ class ResistType(object):
         self.resistDBFile = "{0}/ResistanceProfiles.txt".format(self.resistdb)
 
         #set link to tools used in the pipeline
+        self.spadesPath = 'spades.py'
         self.samtoolsPath = _baseDir + "/bin/samtools"
         self.bcftoolsPath = _baseDir + "/bin/bcftools"
         self.bedtoolsPath = _baseDir + "/bin/bedtools"
@@ -219,8 +220,6 @@ class ResistType(object):
         os.system(cmdLine)
         self.fastqFile1 = self.filteredFastqFile1
         self.fastqFile2 = self.filteredFastqFile2
-
-        self.spadesPath = 'spades.py'
         self.contigFile = '{0}.contigs.fasta'.format(self.prefix)
         self.runSpades(self.filteredFastqFile1, self.filteredFastqFile2, self.contigFile)
         
