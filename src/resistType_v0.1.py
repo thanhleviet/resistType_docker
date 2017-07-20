@@ -107,9 +107,9 @@ class ResistType(object):
         self.fastqFile2 = args[7]
 
         if self.fastqFile1 == None:
-            self.fastqFile1 =  "fastq/{0}.reads1.fq.gz".format(self.suffix)
+            self.fastqFile1 =  "{0}.reads1.fq.gz".format(self.suffix)
         if self.fastqFile2 == None:
-            self.fastqFile2 =  "fastq/{0}.reads2.fq.gz".format(self.suffix)
+            self.fastqFile2 =  "{0}.reads2.fq.gz".format(self.suffix)
         self.pident=args[8]
         self.covThres=args[9]
         self.bamFile=args[10]
